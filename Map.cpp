@@ -107,7 +107,10 @@ bool Map::is_solid(glm::vec3 position, float* penetration_x, float* penetration_
     // inb4: we're passing by reference
     *penetration_x = 0;
     *penetration_y = 0;
-    int level1[] = { 1, 2, 12, 13, 14, 24, 25, 26, 36, 37, 38, 39, 40, 41, 42, 43 };
+    int level1[] = { 0, 1, 2, 12, 13, 14, 24, 25, 26, 36, 37, 38, 39, 40, 41, 42, 43 };
+    int leveldungeon[] = { 0 };
+    int levelgrey[] = { 17 };
+    int levelbrown[] = { 30, 42, 48, 49, 50, 51, 52, 53 };
 
     // If we are out of bounds, it is not solid
     if (position.x < m_left_bound || position.x > m_right_bound)  return false;
@@ -122,20 +125,36 @@ bool Map::is_solid(glm::vec3 position, float* penetration_x, float* penetration_
 
     // If the tile index is 0 i.e. an open space, it is not solid
     int tile = m_level_data[tile_y * m_width + tile_x];
-    if (tile == 0) return false;
+    // if (tile == 0) return false;
     if (level == 1) {
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 17; i++) {
             if (tile == level1[i]) {
                 return false;
             }
         }
     }
     else if (level == 2) {
-        //
+        for (int i = 0; i < 1; i++) {
+            if (tile == leveldungeon[i]) {
+                return false;
+            }
+        }
     }
     else if (level == 3) {
-
+        for (int i = 0; i < 8; i++) {
+            if (tile == levelbrown[i]) {
+                return false;
+            }
+        }
     }
+    else if (level == 4) {
+        for (int i = 0; i < 1; i++) {
+            if (tile == levelgrey[i]){
+                return false;
+            }
+        }
+    }
+    
 
     if (level == 1) {
         if (tile == 123 || tile == 124) is_entrance = true;
@@ -144,6 +163,12 @@ bool Map::is_solid(glm::vec3 position, float* penetration_x, float* penetration_
     }
     if (level == 2) {
         if (tile == 22 || tile == 23) is_entrance = true;
+    }
+    if (level == 3) {
+        // Condition to set entrance
+    }
+    if (level == 4) {
+        if (tile == 2) is_entrance = true;
     }
 
     // And we likely have some overlap

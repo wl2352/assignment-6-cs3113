@@ -2,9 +2,9 @@
 
 class LevelBrown : public Scene {
 public:
-    int ENEMY_COUNT = 5;
+    int ENEMY_COUNT = 1;
     int DEAD_ENEMIES = 0;
-    int WEAPON_COUNT = 2;
+    int WEAPON_COUNT = 1;
     bool win = false;
     bool gameover = false;
     int level_width = 23;

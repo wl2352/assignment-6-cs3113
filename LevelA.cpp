@@ -91,8 +91,8 @@ void LevelA::initialise()
 
     /**
      Enemies' stuff */
-    GLuint basic_enemy_texture_id = Utility::load_texture("assets/images/monster.png");
-    GLuint quick_enemy_texture_id = Utility::load_texture("assets/images/tile_0109.png");
+    GLuint basic_enemy_texture_id = Utility::load_texture("assets/images/enemies/monster.png");
+    GLuint quick_enemy_texture_id = Utility::load_texture("assets/images/enemies/quick.png");
 
     m_state.enemies = new Entity[ENEMY_COUNT];
     m_state.enemies[0].set_entity_type(ENEMY);
@@ -117,7 +117,7 @@ void LevelA::initialise()
 
     /*
     Weapons' Stuff */
-    GLuint bat_texture_id = Utility::load_texture("assets/images/tile_0107.png"); // PLACEHOLDER --> FIND TEXTURE FOR BAT
+    GLuint bat_texture_id = Utility::load_texture("assets/images/weapons/bat.png"); // PLACEHOLDER --> FIND TEXTURE FOR BAT
 
     m_state.weapons = new Entity[WEAPON_COUNT];
     m_state.weapons[0].set_entity_type(WEAPON);
@@ -144,7 +144,7 @@ void LevelA::initialise()
 void LevelA::update(float delta_time)
 {
     //gameover = false;
-    GLuint quick_enemy_texture_id = Utility::load_texture("assets/images/tile_0109.png");
+    GLuint quick_enemy_texture_id = Utility::load_texture("assets/images/enemies/quick.png");
     m_state.player->update(delta_time, m_state.player, m_state.enemies, ENEMY_COUNT, m_state.map);
     //LOG(ENEMY_COUNT);
     //LOG(m_state.player->get_velocity().y);
@@ -159,6 +159,7 @@ void LevelA::update(float delta_time)
             }
             if (m_state.enemies[i].check_collision(m_state.player) && m_state.player->attacking()) {
                 m_state.enemies[i].take_damage(m_state.player);
+                LOG(m_state.enemies[i].get_health());
             }
 
             if (m_state.enemies[i].get_health() <= 0.0f && m_state.enemies[i].is_active()) {
@@ -170,65 +171,53 @@ void LevelA::update(float delta_time)
             LOG(m_state.enemies[i].get_health());
             LOG("=======");*/
         }
-
-        if (!m_state.enemies[0].is_active() && !m_state.enemies[1].is_active() && m_state.enemies[2].get_entity_type() == SPAWNED) {
-            // Spawn 3rd enemy
-            LOG("REACHED HERE OMG FOR ENEMY 3");
-            m_state.enemies[2].set_entity_type(ENEMY);
-            m_state.enemies[2].set_ai_type(GUARD);
-            m_state.enemies[2].set_ai_state(IDLE);
-            m_state.enemies[2].m_texture_id = quick_enemy_texture_id;
-            m_state.enemies[2].set_position(glm::vec3(12.0f, -10.0f, 0.0f));
-            m_state.enemies[2].set_movement(glm::vec3(0.0f));
-            m_state.enemies[2].set_speed(1.5f);
-            m_state.enemies[2].set_scale(0.5);
-        }
-
-        if (!m_state.enemies[2].is_active() && m_state.enemies[3].get_entity_type() == SPAWNED) {
-            // Spawn 3rd enemy
-            LOG("REACHED HERE OMG FOR ENEMY 3");
-            m_state.enemies[3].set_entity_type(ENEMY);
-            m_state.enemies[3].set_ai_type(GUARD);
-            m_state.enemies[3].set_ai_state(IDLE);
-            m_state.enemies[3].m_texture_id = quick_enemy_texture_id;
-            m_state.enemies[3].set_position(glm::vec3(9.0f, -9.0f, 0.0f));
-            m_state.enemies[3].set_movement(glm::vec3(0.0f));
-            m_state.enemies[3].set_speed(1.5f);
-            m_state.enemies[3].set_scale(0.5);
-        }
-        LOG(DEAD_ENEMIES);
-        //LOG(m_state.enemies[i].get_health());
+        // LOG(DEAD_ENEMIES);
     }
 
+    if (!(m_state.enemies[0].is_active()) && !(m_state.enemies[1].is_active()) && m_state.enemies[2].get_entity_type() == SPAWNED) {
+        // Spawn 3rd enemy
+        LOG("REACHED HERE OMG FOR ENEMY 3");
+        m_state.enemies[2].set_entity_type(ENEMY);
+        m_state.enemies[2].set_ai_type(GUARD);
+        m_state.enemies[2].set_ai_state(IDLE);
+        m_state.enemies[2].m_texture_id = quick_enemy_texture_id;
+        m_state.enemies[2].set_position(glm::vec3(3.5f, -11.0f, 0.0f));
+        m_state.enemies[2].set_movement(glm::vec3(0.0f));
+        m_state.enemies[2].set_speed(1.5f);
+        m_state.enemies[2].set_scale(0.5);
+    }
+
+    else if (!(m_state.enemies[2].is_active()) && m_state.enemies[3].get_entity_type() == SPAWNED) {
+        // Spawn 3rd enemy
+        LOG("REACHED HERE OMG FOR ENEMY 4");
+        m_state.enemies[3].set_entity_type(ENEMY);
+        m_state.enemies[3].set_ai_type(GUARD);
+        m_state.enemies[3].set_ai_state(IDLE);
+        m_state.enemies[3].m_texture_id = quick_enemy_texture_id;
+        m_state.enemies[3].set_position(glm::vec3(9.0f, -9.0f, 0.0f));
+        m_state.enemies[3].set_movement(glm::vec3(0.0f));
+        m_state.enemies[3].set_speed(1.5f);
+        m_state.enemies[3].set_scale(0.5);
+    }
+
+    int idx = -1;
     for (int i = 0; i < WEAPON_COUNT; i++)
     {
         if (m_state.weapons[i].is_equipped()) m_state.weapons[i].follow_player(m_state.player);
         else {
             m_state.weapons[i].update(delta_time, m_state.player, 0, 0, m_state.map);
             if (m_state.player->check_collision(&m_state.weapons[i])) {
-                // Check for empty slots
-                if (m_state.player->get_first_weapon() == FISTS) {
-                    m_state.player->set_first_weapon(m_state.weapons[i].get_weapon_type());
-                    // If the equipped weapon is a fist right after picking up a new weapon, equip the new weapon
-                    if (m_state.player->get_equipped_weapon() == FISTS) {
-                        m_state.player->set_equipped_weapon(m_state.player->get_first_weapon(), &m_state.weapons[i]);
-                        m_state.weapons[i].equip();
-                        LOG(m_state.weapons[i].is_equipped());
-                    }
+                if (idx != -1) {
+                    m_state.player->unequip_weapon_model(&m_state.weapons[idx]);
+                    m_state.weapons[idx].unequip();
                 }
-                else if (m_state.player->get_second_weapon() == FISTS) {
-                    m_state.player->set_second_weapon(m_state.weapons[i].get_weapon_type());
-                    // If the equipped weapon is a fist right after picking up a new weapon, equip the new weapon
-                    if (m_state.player->get_equipped_weapon() == FISTS) {
-                        m_state.player->set_equipped_weapon(m_state.player->get_second_weapon(), &m_state.weapons[i]);
-                        m_state.weapons[i].equip();
-                    }
-                }
+                m_state.player->set_equipped_weapon(m_state.weapons[i].get_weapon_type(), &m_state.weapons[i]);
+                m_state.weapons[i].equip();
+                LOG(m_state.weapons[i].is_equipped());
+                idx = i;
+
             }
         }
-        
-        // LOG(m_state.player->get_health());
-
         /*LOG("====================");
         LOG("Current equipped weapon:");
         LOG(m_state.player->get_equipped_weapon());

@@ -188,6 +188,7 @@ public:
     void const set_level(int new_level) { level = new_level; };
     void const equip() { is_equip = true; };
     void const unequip() { is_equip = false; };
+    void const unequip_weapon_model(Entity* weapon);
     void const attack() { is_attacking = true; };
     void const stop_attack() { is_attacking = false; };
 };

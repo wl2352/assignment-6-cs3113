@@ -174,6 +174,7 @@ void Entity::ai_winger(Entity* player) {
 void Entity::follow_player(Entity* player) {
     m_model_matrix = glm::mat4(1.0f);
     m_model_matrix = glm::translate(m_model_matrix, glm::vec3(player->m_position.x + 0.2f, player->m_position.y + 0.1f, 0.0f));
+    m_model_matrix = glm::scale(m_model_matrix, m_curr_scale);
 }
 
 void Entity::take_damage(Entity* other) {
@@ -233,6 +234,10 @@ const void Entity::set_equipped_weapon(Weapon weapon, Entity* weapon_model) {
     default:
         break;
     }
+}
+
+const void Entity::unequip_weapon_model(Entity* weapon) {
+    weapon->unequip();
 }
 
 

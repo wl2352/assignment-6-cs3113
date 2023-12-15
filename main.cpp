@@ -189,31 +189,6 @@ void process_input()
                 }
                 break;
 
-            case SDLK_1:
-                g_current_scene->m_state.player->set_equipped_weapon(
-                    g_current_scene->m_state.player->get_first_weapon()
-                );
-                curr_weapon_slot = 1;
-                LOG(curr_weapon_slot);
-                break;
-
-            case SDLK_2:
-                g_current_scene->m_state.player->set_equipped_weapon(
-                    g_current_scene->m_state.player->get_second_weapon()
-                );
-                curr_weapon_slot = 2;
-                LOG(curr_weapon_slot);
-                break;
-
-            case SDLK_g:
-                g_current_scene->m_state.player->set_equipped_weapon(FISTS);
-                if (curr_weapon_slot == 1) {
-                    g_current_scene->m_state.player->set_first_weapon(FISTS);
-                }
-                else {
-                    g_current_scene->m_state.player->set_second_weapon(FISTS);
-                }
-
             case SDLK_p:
                 is_paused = !is_paused;
                 break;
@@ -310,11 +285,20 @@ void update()
         // LOG(g_current_scene->m_state.map->get_entrance());
 
         // LOG(g_current_scene->m_state.player->get_position().x);
-        // Forward level progression
+        // Level progression
+        LOG("Level A:");
+        LOG(g_level_a->is_passed());
+        LOG("Level Grey:");
+        LOG(g_level_grey->is_passed());
+        LOG("Level Brown:");
+        LOG(g_level_brown->is_passed());
+        LOG("Level Dungeon:");
+        LOG(g_level_dungeon->is_passed());
+        LOG("========");
         if (g_current_scene == g_level_a) {
             if (g_current_scene->m_state.map->get_goal_to_grey() ) switch_to_scene(g_level_grey);
-            if (g_current_scene->m_state.map->get_goal_to_brown() ) switch_to_scene(g_level_brown);
-            if (g_current_scene->m_state.player->colliding_top() && g_current_scene->m_state.map->get_entrance()) switch_to_scene(g_level_dungeon);
+            if (g_current_scene->m_state.map->get_goal_to_brown() && g_level_grey->is_passed() && g_level_a->is_passed()) switch_to_scene(g_level_brown);
+            if (g_current_scene->m_state.map->get_entrance()) switch_to_scene(g_level_dungeon);
         }
 
         if (g_current_scene == g_level_dungeon) {
@@ -322,20 +306,9 @@ void update()
         }
 
         if (g_current_scene == g_level_grey) {
-            // pass to next level based on parameters
+            if (g_current_scene->m_state.player->colliding_top() && g_current_scene->m_state.map->get_entrance()) switch_to_scene(g_level_a);
         }
 
-        /*if (g_current_scene == g_level_a && g_current_scene->m_state.player->get_position().x > g_level_a->get_edge()) switch_to_scene(g_level_dungeon);
-        if (g_current_scene == g_level_dungeon && g_current_scene->m_state.player->get_position().x > g_level_dungeon->get_edge()) switch_to_scene(g_level_b);
-        if (g_current_scene == g_level_b && g_current_scene->m_state.player->get_position().x > g_level_b->get_edge()) g_current_scene->m_state.player->set_winner();*/
-
-        // TODO: Backwards level regression
-
-        /*if ((g_current_scene->m_state.player->is_colliding_other_x()) || (g_current_scene->m_state.player->is_colliding_other_y()))
-        {
-            switch_to_scene(g_level_a);
-            lives -= 1;
-        }*/
         if (g_current_scene->m_state.player->get_health() == 0) g_current_scene->m_state.player->deactivate();
     }
 }
@@ -355,7 +328,7 @@ void render()
             Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("YOU LOSE!!"), 0.50f, 0.00f, glm::vec3(2.5f, -2.0f, 0.0f));
             //g_game_is_running = false;
         }
-        if (g_current_scene->m_state.player->is_winner()) {
+        if (g_level_brown->is_passed()) {
             secs += 1;
             // WINNER
             Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("YOU WIN!!"), 0.50f, 0.00f, glm::vec3(g_current_scene->m_state.player->get_position().x - 4.0f,
@@ -371,11 +344,13 @@ void render()
     g_current_scene->render(&g_shader_program);
 
     if (g_current_scene == g_main_menu) {
-        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("Press Enter to Start"), 0.45f, 0.0f, glm::vec3(-2.5f, 0.0f, 0.0f));
-        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("WASD to move"), 0.25f, 0.0f, glm::vec3(-2.5f, -0.9f, 0.0f));
-        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("SPACE to attack"), 0.25f, 0.0f, glm::vec3(-2.5f, -1.2f, 0.0f));
-        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("1 or 2 to equip weapon"), 0.25f, 0.0f, glm::vec3(-2.5f, -1.5f, 0.0f));
-        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("G to destroy item"), 0.25f, 0.0f, glm::vec3(-2.5f, -1.8f, 0.0f));
+        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("Press Enter to Start"), 0.45f, 0.0f, glm::vec3(-4.5f, 0.0f, 0.0f));
+        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("WASD to move"), 0.25f, 0.0f, glm::vec3(-3.5f, -0.9f, 0.0f));
+        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("SPACE to attack"), 0.25f, 0.0f, glm::vec3(-3.0f, -1.2f, 0.0f));
+    }
+
+    if (g_level_brown->is_passed()) {
+        Utility::draw_text(&g_shader_program, g_text_texture_id, std::string("YOU WIN"), 0.45f, 0.0f, glm::vec3(-2.5f, 0.0f, 0.0f));
     }
 
     SDL_GL_SwapWindow(g_display_window);
